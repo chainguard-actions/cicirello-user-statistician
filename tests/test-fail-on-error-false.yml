@@ -1,0 +1,28 @@
+name: Test fail-on-error false
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: invalid-token-to-trigger-error
+      GH_TOKEN: invalid-token-to-trigger-error
+      GITHUB_REPOSITORY_OWNER: testowner
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          image-file: images/userstats-error.svg
+          commit-and-push: "false"
+          fail-on-error: "false"
+      - name: Assert workflow did not fail and exit-code is set
+        env:
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ -z "$EXIT_CODE" ]; then
+            echo "FAIL: exit-code output was empty"
+            exit 1
+          fi
+          echo "PASS: action completed with exit-code '$EXIT_CODE' and did not fail the workflow"

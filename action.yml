@@ -1,0 +1,138 @@
+# user-statistician: Github action for generating a user stats card
+# 
+# Copyright (c) 2021-2024 Vincent A Cicirello
+# https://www.cicirello.org/
+#
+# MIT License
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+# 
+name: 'user-statistician'
+description: "Generate a GitHub stats SVG for your GitHub Profile README in GitHub Actions"
+branding: 
+  icon: 'book-open'
+  color: 'green'
+inputs:
+  image-file:  
+    description: 'Name and path of the image file to generate, relative to root of repository'
+    required: false
+    default: images/userstats.svg
+  include-title:
+    description: 'Include a title in the image'
+    required: false
+    default: true
+  custom-title:
+    description: 'Define a custom title for the image'
+    required: false
+    default: ''
+  colors:
+    description: 'The color theme or list of custom colors'
+    required: false
+    default: light	
+  hide-keys:
+    description: 'A list of statistics to hide specified by their key'
+    required: false
+    default: ''
+  fail-on-error:
+    description: 'Choose whether to fail the workflow if there is an error'
+    required: false
+    default: true
+  commit-and-push:
+    description: 'Commits and pushes the generated image'
+    required: false
+    default: true
+  locale:
+    description: 'One of the supported ISO 639-1 (two character) or ISO 639-2 (three character) language codes'
+    required: false
+    default: en
+  border-radius:
+    description: 'The radius of the border'
+    required: false
+    default: 6
+  show-border:
+    description: 'Controls whether the stats SVG has a border'
+    required: false
+    default: true
+  small-title:
+    description: 'Controls size of title'
+    required: false
+    default: false
+  max-languages:
+    description: 'Controls maximum number of languages to list separately'
+    required: false
+    default: auto
+  category-order:
+    description: 'List of keys for the categories in order of appearance.'
+    required: false
+    default: general, repositories, contributions, languages
+  language-repository-exclusions:
+    description: 'List of repositories to exclude from language stats.'
+    required: false
+    default: ''
+  featured-repository:
+    description: 'Name of a repository to feature in the General Stats and Info section'
+    required: false
+    default: ''
+  animated-language-chart:
+    description: 'Boolean controlling whether the language chart is animated'
+    required: false
+    default: false
+  language-animation-speed:
+    description: 'The time for one full rotation in seconds'
+    required: false
+    default: 10
+  image-width:
+    description: 'The minimum width of the SVG in pixels'
+    required: false
+    default: 0
+  top-icon:
+    description: 'Icon displayed at top of SVG to left and right of title'
+    required: false
+    default: default
+  commit-message: 
+    description: 'The commit message'
+    required: false
+    default: 'Automated change by https://github.com/cicirello/user-statistician'
+outputs:
+  exit-code:
+    description: '0 if successful or non-zero if unsuccessful'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.image-file }}
+    - ${{ inputs.include-title }}
+    - ${{ inputs.custom-title }}
+    - ${{ inputs.colors }}
+    - ${{ inputs.hide-keys }}
+    - ${{ inputs.fail-on-error }}
+    - ${{ inputs.commit-and-push }}
+    - ${{ inputs.locale }}
+    - ${{ inputs.border-radius }}
+    - ${{ inputs.show-border }}
+    - ${{ inputs.small-title }}
+    - ${{ inputs.max-languages }}
+    - ${{ inputs.category-order }}
+    - ${{ inputs.language-repository-exclusions }}
+    - ${{ inputs.featured-repository }}
+    - ${{ inputs.animated-language-chart }}
+    - ${{ inputs.language-animation-speed }}
+    - ${{ inputs.image-width }}
+    - ${{ inputs.top-icon }}
+    - ${{ inputs.commit-message }}

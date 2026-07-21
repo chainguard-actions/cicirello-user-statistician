@@ -1,0 +1,60 @@
+name: build
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore: [ '**.svg', '**.md' ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+    - name: Setup Python
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+      with:
+        python-version: '3.12'
+
+    - name: Run Python unit tests
+      run: |
+        python3 -u -m unittest tests/tests.py
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+    - name: Verify that the Docker image for the action builds
+      run: docker build . --file Dockerfile
+
+    - name: Integration test
+      id: integration
+      uses: ./
+      with:
+        colors: dark
+        commit-and-push: false
+        featured-repository: Chips-n-Salsa
+        animated-language-chart: true
+        locale: en
+        #fail-on-error: false
+        #category-order: general, repositories, languages, contributions
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+    - name: Output the outputs of the integration test of the action
+      env:
+        EXIT_CODE: ${{ steps.integration.outputs.exit-code }}
+      run: |
+        echo "exit-code = $EXIT_CODE"
+
+    - name: Upload generated SVG as a workflow artifact for inspection if necessary
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      with:
+        name: generated-image
+        path: images/userstats.svg

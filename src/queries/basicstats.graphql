@@ -1,0 +1,25 @@
+query($owner: String!) {
+  user(login: $owner) {
+    login
+    name
+    createdAt
+    followers(first: 1) {
+      totalCount
+    }
+    following(first: 1) {
+      totalCount
+    }
+    issues(first: 1) {
+      totalCount
+    }
+    pullRequests(first: 1) {
+      totalCount
+    }
+    sponsorshipsAsMaintainer(first: 1) {
+      totalCount
+    }
+    sponsorshipsAsSponsor(first: 1)  {
+      totalCount
+    }
+  }
+}

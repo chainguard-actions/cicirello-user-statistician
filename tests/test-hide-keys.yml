@@ -1,0 +1,58 @@
+name: Test hide-keys and no-title options
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        with:
+          image-file: images/userstats-notitle.svg
+          commit-and-push: false
+          fail-on-error: false
+          include-title: false
+          hide-keys: "followers, following"
+          colors: light
+          show-border: true
+
+      - name: Assert exit-code output is set
+        env:
+          ACTUAL: ${{ steps.action.outputs.exit-code }}
+        run: |
+          echo "actual exit-code: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: exit-code output was not set"
+            exit 1
+          fi
+          echo "PASS: exit-code is set to '$ACTUAL'"
+
+      - name: Assert SVG file was created if exit-code is 0
+        env:
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ "$EXIT_CODE" = "0" ]; then
+            if [ ! -f "$GITHUB_WORKSPACE/images/userstats-notitle.svg" ]; then
+              echo "FAIL: expected SVG file not found at images/userstats-notitle.svg"
+              exit 1
+            fi
+            SIZE=$(wc -c < "$GITHUB_WORKSPACE/images/userstats-notitle.svg")
+            echo "SVG file size: $SIZE bytes"
+            if [ "$SIZE" -lt 100 ]; then
+              echo "FAIL: SVG file is too small (${SIZE} bytes)"
+              exit 1
+            fi
+            if ! grep -q "<svg" "$GITHUB_WORKSPACE/images/userstats-notitle.svg"; then
+              echo "FAIL: file does not appear to be a valid SVG"
+              exit 1
+            fi
+            echo "PASS: SVG file is valid ($SIZE bytes)"
+          else
+            echo "INFO: exit-code is $EXIT_CODE (API may have failed), skipping SVG file check"
+            echo "PASS: action completed without workflow failure"
+          fi

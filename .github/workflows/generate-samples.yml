@@ -1,0 +1,54 @@
+name: samples
+
+on:
+  schedule:
+    - cron: '0 1 * * 6'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  samples:
+
+    runs-on: ubuntu-latest
+      
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        ref: samples
+
+    - name: Sample light
+      uses: cicirello/user-statistician@36500351ea14b69e68217d4c89eb0f3f06680b17 # v1
+      with:
+        colors: light
+        image-file: images/light.svg
+        # Using custom-title is not necessary here in general.
+        # I'm just using it so that the sample has a more generic name
+        # of user rather than my name. The format this uses is identical
+        # to if this input was not used, but with my name replaced by a
+        # generic name.
+        custom-title: Firstname Lastname's GitHub Activity
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+    - name: Sample dark
+      uses: cicirello/user-statistician@36500351ea14b69e68217d4c89eb0f3f06680b17 # v1
+      with:
+        colors: dark
+        image-file: images/dark.svg
+        include-title: false
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+    - name: Sample dark-dimmed
+      uses: cicirello/user-statistician@36500351ea14b69e68217d4c89eb0f3f06680b17 # v1
+      with:
+        colors: dark-dimmed
+        image-file: images/dark-dimmed.svg
+        custom-title: My GitHub Statistics
+        hide-keys: joined, mostStarred, mostForked, followers, following, private
+        max-languages: 100
+        animated-language-chart: true
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}

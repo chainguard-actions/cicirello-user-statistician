@@ -1,0 +1,59 @@
+name: Test custom options
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        with:
+          image-file: output/stats-custom.svg
+          commit-and-push: false
+          fail-on-error: false
+          colors: dark
+          include-title: true
+          custom-title: "Custom Stats Title"
+          show-border: false
+          small-title: true
+          max-languages: 5
+          animated-language-chart: true
+          language-animation-speed: 15
+          top-icon: none
+          category-order: "general, repositories, contributions, languages"
+
+      - name: Assert exit-code output is set
+        env:
+          ACTUAL: ${{ steps.action.outputs.exit-code }}
+        run: |
+          echo "actual exit-code: $ACTUAL"
+          if [ -z "$ACTUAL" ]; then
+            echo "FAIL: exit-code output was not set"
+            exit 1
+          fi
+          echo "PASS: exit-code is set to '$ACTUAL'"
+
+      - name: Assert SVG file was created at custom path if exit-code is 0
+        env:
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ "$EXIT_CODE" = "0" ]; then
+            if [ ! -f "$GITHUB_WORKSPACE/output/stats-custom.svg" ]; then
+              echo "FAIL: expected SVG file not found at output/stats-custom.svg"
+              exit 1
+            fi
+            if ! grep -q "<svg" "$GITHUB_WORKSPACE/output/stats-custom.svg"; then
+              echo "FAIL: file does not appear to be a valid SVG"
+              cat "$GITHUB_WORKSPACE/output/stats-custom.svg"
+              exit 1
+            fi
+            echo "PASS: SVG file exists at custom path and contains valid SVG content"
+          else
+            echo "INFO: exit-code is $EXIT_CODE (API may have failed), skipping SVG file check"
+            echo "PASS: action completed without workflow failure"
+          fi

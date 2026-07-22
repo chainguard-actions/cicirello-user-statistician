@@ -14,6 +14,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | v1.25.0 | [`v1.25.0`](https://github.com/chainguard-actions/cicirello-user-statistician/tree/v1.25.0) | [`6a7e459`](https://github.com/cicirello/user-statistician/commit/6a7e459d1174b5822afa99a7c6acccf376cb2eb1) |
 | v1.26.0 | [`v1.26.0`](https://github.com/chainguard-actions/cicirello-user-statistician/tree/v1.26.0) | [`2be8790`](https://github.com/cicirello/user-statistician/commit/2be87901e682c6e626a342c8cd61c1a9fcd8b2f0) |
 | v1.26.2 | [`v1.26.2`](https://github.com/chainguard-actions/cicirello-user-statistician/tree/v1.26.2) | [`c264af1`](https://github.com/cicirello/user-statistician/commit/c264af153092bf60143f85e7683739898a274b94) |
+| v1.26.3 | [`v1.26.3`](https://github.com/chainguard-actions/cicirello-user-statistician/tree/v1.26.3) | [`3650035`](https://github.com/cicirello/user-statistician/commit/36500351ea14b69e68217d4c89eb0f3f06680b17) |
 
 ## Privacy
 

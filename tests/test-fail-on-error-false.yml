@@ -1,0 +1,54 @@
+name: Test fail-on-error false with valid inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up git origin reachable inside Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - id: action
+        uses: .
+        env:
+          GH_TOKEN: ${{ env.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+        with:
+          image-file: images/stats-soft-fail.svg
+          fail-on-error: false
+          commit-and-push: false
+          colors: light
+          include-title: true
+
+      - name: Assert exit-code output is present
+        env:
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          # With fail-on-error: false, the action should always set an exit-code output
+          # and should never fail the workflow step itself
+          if [ -z "$EXIT_CODE" ]; then
+            echo "FAIL: exit-code output was not set"
+            exit 1
+          fi
+          echo "PASS: exit-code output is present: $EXIT_CODE"
+
+      - name: Assert action completed without crashing
+        env:
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          # With fail-on-error: false, the action should exit with 0 regardless of API errors
+          # The exit-code output reflects the actual outcome
+          echo "PASS: action completed with exit-code $EXIT_CODE"

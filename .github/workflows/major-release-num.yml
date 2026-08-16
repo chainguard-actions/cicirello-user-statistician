@@ -1,0 +1,26 @@
+name: Move Major Release Tag
+
+on:
+  release:
+    types: [created]
+
+permissions:
+  contents: write
+
+jobs:
+  movetag:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+    - name: Get major version num and update tag
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/}
+        MAJOR=${VERSION%%.*}
+        git config --global user.name 'Vincent A Cicirello'
+        git config --global user.email 'cicirello@users.noreply.github.com'
+        git tag -fa ${MAJOR} -m "Update major version tag"
+        git push origin ${MAJOR} --force
+
+        

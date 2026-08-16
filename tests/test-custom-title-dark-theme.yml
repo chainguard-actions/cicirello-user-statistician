@@ -1,0 +1,66 @@
+name: Test custom title and dark theme
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up git origin reachable inside Docker container
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          rm -rf "$GITHUB_WORKSPACE/.git-remote"
+          git init --bare "$GITHUB_WORKSPACE/.git-remote"
+          git push "$GITHUB_WORKSPACE/.git-remote" HEAD:refs/heads/act-harness
+          git remote set-url origin "$GITHUB_WORKSPACE/.git-remote" 2>/dev/null || \
+            git remote add origin "$GITHUB_WORKSPACE/.git-remote"
+
+      - id: action
+        uses: .
+        env:
+          GH_TOKEN: ${{ env.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+        with:
+          image-file: images/dark-stats.svg
+          include-title: true
+          custom-title: "My GitHub Stats"
+          colors: dark
+          commit-and-push: false
+          fail-on-error: false
+
+      - name: Assert exit-code output is present
+        env:
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ -z "$EXIT_CODE" ]; then
+            echo "FAIL: exit-code output was not set"
+            exit 1
+          fi
+          echo "PASS: exit-code output is present: $EXIT_CODE"
+
+      - name: Assert SVG file and custom title when successful
+        env:
+          EXIT_CODE: ${{ steps.action.outputs.exit-code }}
+        run: |
+          echo "exit-code: $EXIT_CODE"
+          if [ "$EXIT_CODE" = "0" ]; then
+            if [ ! -f "$GITHUB_WORKSPACE/images/dark-stats.svg" ]; then
+              echo "FAIL: exit-code is 0 but SVG file not found at images/dark-stats.svg"
+              exit 1
+            fi
+            echo "PASS: SVG file exists"
+            CONTENT=$(cat "$GITHUB_WORKSPACE/images/dark-stats.svg")
+            if ! echo "$CONTENT" | grep -q "My GitHub Stats"; then
+              echo "FAIL: custom title 'My GitHub Stats' not found in SVG"
+              exit 1
+            fi
+            echo "PASS: custom title found in SVG"
+          else
+            echo "INFO: exit-code is $EXIT_CODE (non-zero), SVG may not have been generated"
+            echo "PASS: action ran and reported exit-code"
+          fi

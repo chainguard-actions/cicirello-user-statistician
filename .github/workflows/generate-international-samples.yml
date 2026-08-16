@@ -1,0 +1,35 @@
+name: international samples
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  samples:
+
+    runs-on: ubuntu-latest
+      
+    steps:
+    - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      with:
+        ref: samples
+
+    - name: Sample German
+      uses: cicirello/user-statistician@1c77e7a9c65279eccdfe12843255e10c7b62adb5 # v1
+      with:
+        colors: light
+        locale: de
+        image-file: images/de.svg
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+    - name: Sample Italian
+      uses: cicirello/user-statistician@1c77e7a9c65279eccdfe12843255e10c7b62adb5 # v1
+      with:
+        colors: dark
+        locale: it
+        image-file: images/it.svg
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
